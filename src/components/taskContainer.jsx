@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Footer } from "./footer/footer";
 import { Header } from "./header/header";
 import { TaskInput } from "./taskInput/taskInput";
@@ -10,25 +10,40 @@ export const TaskContainer = () => {
 
   const [tasksList, setTaskList] = useState([]);
 
+  useEffect(() => {
+    const storedTasks = localStorage.getItem("tasksList");
+    if (storedTasks) {
+      setTaskList(JSON.parse(storedTasks));
+    }
+  }, []);
+
+  const saveTasksToLocalStorage = (tasksList) => {
+    localStorage.setItem("tasksList", JSON.stringify(tasksList));
+  }
+
   const addTask = (title) => {
     const newTask = {
       id: tasksList.length ? tasksList[tasksList.length - 1].id + 1 : 1,
       title: title,
       completed: false
     };
-    setTaskList([...tasksList, newTask]);
+    const updatedTasks = [...tasksList, newTask];
+    setTaskList(updatedTasks);
+    saveTasksToLocalStorage(updatedTasks);
   };
 
   const editTask = (id, completedValue) => {
-    setTaskList(
-      tasksList.map((task) => 
+    const updatedTasks = tasksList.map((task) => 
         task.id === id ? {...task, completed: completedValue} : task
-      )
     );
+    setTaskList(updatedTasks);
+    saveTasksToLocalStorage(updatedTasks);
   };
 
   const deleteTask = (id) => {
-    setTaskList(tasksList.filter((task) => task.id !== id))
+    const updatedTasks = tasksList.filter((task) => task.id !== id);
+    setTaskList(updatedTasks);
+    saveTasksToLocalStorage(updatedTasks);
   }
 
   const getTaskCounts = () => {
